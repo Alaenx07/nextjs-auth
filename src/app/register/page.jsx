@@ -2,6 +2,8 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import Navbar from "../components/Navbar";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 function RegisterPage() {
   const [name, setName] = useState("");
@@ -9,6 +11,10 @@ function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const { data: session } = useSession();
+  if (session) redirect("/welcome");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,6 +29,20 @@ function RegisterPage() {
     }
 
     try {
+      const resCheckUser = await fetch("http://localhost:3000/api/checkUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const { user } = await resCheckUser.json();
+      if (user) {
+        setError("User already Exist");
+        return;
+      }
+
       const res = await fetch("http://localhost:3000/api/register", {
         method: "POST",
         headers: {
@@ -32,11 +52,12 @@ function RegisterPage() {
           name,
           email,
           password,
-        })
+        }),
       });
       if (res.ok) {
         const form = e.target;
         setError("");
+        setSuccess("User registration successfully");
         form.reset();
       } else {
         console.log("User registration failed");
@@ -55,6 +76,11 @@ function RegisterPage() {
           {error && (
             <div className=" bg-red-500 w-fit text-sm text-white py-1 px-3 rounded-md mt-2">
               {error}
+            </div>
+          )}
+          {success && (
+            <div className=" bg-green-500 w-fit text-sm text-white py-1 px-3 rounded-md mt-2">
+              {success}
             </div>
           )}
           <input
