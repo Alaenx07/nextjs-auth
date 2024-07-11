@@ -17,18 +17,19 @@ function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
       const res = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
+
       if (res.error) {
         setError("Invalid credentials");
         setLoading(false); // Set loading to false if there is an error
         return;
       }
-      router.replace("welcome");
     } catch (e) {
       console.log(e);
       setError("An error occurred while signing in");

@@ -6,9 +6,12 @@ import { redirect } from "next/navigation";
 
 function WelcomePage() {
   const { data: session } = useSession();
-  console.log(session);
-
+  console.log(session?.user?.role);
   if (!session) redirect("/login");
+
+  if (session?.user?.role === "admin") {
+    redirect("/admin");
+  }
 
   return (
     <div>
